@@ -17,9 +17,13 @@ interface SummaryDetails {
 }
 
 interface MeetingState {
+  meetingId: string | null;
+  userName: string;
   notes: string;
   meetingDetails: MeetingDetails;
   summaryDetails: SummaryDetails;
+  setMeetingId: (id: string | null) => void;
+  setUserName: (name: string) => void;
   setNotes: (notes: string) => void;
   setMeetingDetails: (details: MeetingDetails) => void;
   setSummaryDetails: (summary: SummaryDetails) => void;
@@ -28,6 +32,8 @@ interface MeetingState {
 export const useMeetingStore = create<MeetingState>()(
   persist(
     (set) => ({
+      meetingId: null,
+      userName: '',
       notes: '',
       meetingDetails: {
         meetingDay: '',
@@ -41,6 +47,8 @@ export const useMeetingStore = create<MeetingState>()(
         mainPointDiscussed: '',
         resolution: '',
       },
+      setMeetingId: (id) => set({ meetingId: id }),
+      setUserName: (name) => set({ userName: name }),
       setNotes: (notes) => set({ notes }),
       setMeetingDetails: (details) => set({ meetingDetails: details }),
       setSummaryDetails: (summary) => set({ summaryDetails: summary }),

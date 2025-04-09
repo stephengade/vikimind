@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -21,6 +20,17 @@ export default function Home() {
           Vikimind helps you capture, summarize, and organize your meeting notes with ease.
           Get real-time transcription, AI-powered summaries, and seamless collaboration.
         </p>
+
+        <p className="text-lg text-gray-500 mb-6">
+          Vikimind uses AI to understand the context of your meetings, making note-taking simpler and more efficient.
+        </p>
+
+        <ul className="list-disc list-inside text-gray-500">
+          <li>Record and organize meeting details</li>
+          <li>Capture notes in real-time</li>
+          <li>Generate AI-powered summaries</li>
+          <li>Store and review past meetings</li>
+        </ul>
       </section>
 
       <section className="flex flex-wrap justify-center gap-6 mb-12">
@@ -52,8 +62,11 @@ export default function Home() {
       </section>
 
       <footer className="text-center">
-        <Link href="/minutes" className="px-8 py-4 bg-teal-500 text-white font-bold rounded-md hover:bg-teal-700 transition-colors text-xl">
+        <Link href="/note/create" className="px-8 py-4 bg-teal-500 text-white font-bold rounded-md hover:bg-teal-700 transition-colors text-xl">
           Start Taking Notes Now
+        </Link>
+         <Link href="/account" className="ml-4 px-8 py-4 bg-gray-200 text-gray-700 font-bold rounded-md hover:bg-gray-300 transition-colors text-xl">
+          View Account
         </Link>
       </footer>
     </div>
