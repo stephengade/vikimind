@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useMeetingStore } from "@/store/meetingStore";
 
-interface RealTimeEditorProps {
-  notes: string;
-  setNotes: (notes: string) => void;
-}
+const RealTimeEditor = () => {
+  const { notes, setNotes } = useMeetingStore();
 
-const RealTimeEditor: React.FC<RealTimeEditorProps> = ({ notes, setNotes }) => {
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       setNotes(event.target.value);
@@ -29,6 +27,17 @@ const RealTimeEditor: React.FC<RealTimeEditorProps> = ({ notes, setNotes }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleSave = () => {
+    localStorage.setItem("meetingNotes", notes);
+  };
+
+  useEffect(() => {
+    const savedNotes = localStorage.getItem("meetingNotes");
+    if (savedNotes) {
+      setNotes(savedNotes);
+    }
+  }, [setNotes]);
+
   return (
     <div className="space-y-4">
       <Textarea
@@ -37,7 +46,10 @@ const RealTimeEditor: React.FC<RealTimeEditorProps> = ({ notes, setNotes }) => {
         onChange={handleInputChange}
         className="min-h-[300px]"
       />
-      <Button onClick={handleExport}>Export to TXT</Button>
+      <div className="flex space-x-2">
+        <Button onClick={handleExport}>Export to TXT</Button>
+        <Button onClick={handleSave}>Save</Button>
+      </div>
     </div>
   );
 };

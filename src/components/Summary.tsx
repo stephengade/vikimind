@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { summarizeMinutes, SummarizeMinutesOutput } from "@/ai/flows/summarize-minutes-flow";
+import { useMeetingStore } from "@/store/meetingStore";
 
 const formSchema = z.object({
   mainPointDiscussed: z.string().min(10, {
@@ -24,23 +25,18 @@ const formSchema = z.object({
   }),
 });
 
-interface SummaryProps {
-  notes: string;
-  meetingDetails: any;
-  setSummary: (summary: any) => void;
-}
-
-const Summary: React.FC<SummaryProps> = ({ notes, meetingDetails, setSummary }) => {
+const Summary = () => {
+  const { notes, meetingDetails, summaryDetails, setSummaryDetails } = useMeetingStore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      mainPointDiscussed: "",
-      resolution: "",
+      mainPointDiscussed: summaryDetails.mainPointDiscussed,
+      resolution: summaryDetails.resolution,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setSummary({
+    setSummaryDetails({
       mainPointDiscussed: values.mainPointDiscussed,
       resolution: values.resolution,
     });
@@ -50,13 +46,12 @@ const Summary: React.FC<SummaryProps> = ({ notes, meetingDetails, setSummary }) 
         const result: SummarizeMinutesOutput = await summarizeMinutes({ minutes: notes });
         form.setValue("mainPointDiscussed", result.mainPoints.join("\\n"));
         form.setValue("resolution", result.resolution);
-        setSummary({
+        setSummaryDetails({
           mainPointDiscussed: result.mainPoints.join("\\n"),
           resolution: result.resolution,
         });
       } catch (error) {
         console.error("Error summarizing minutes:", error);
-        // Handle error appropriately (e.g., display an error message to the user)
       }
     }
   }
