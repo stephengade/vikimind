@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { summarizeMinutes, SummarizeMinutesOutput } from "@/ai/flows/summarize-minutes-flow";
 import { useMeetingStore } from "@/store/meetingStore";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   mainPointDiscussed: z.string().min(10, {
@@ -27,6 +28,7 @@ const formSchema = z.object({
 
 const Summary = () => {
   const { notes, meetingDetails, summaryDetails, setSummaryDetails } = useMeetingStore();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,8 +52,16 @@ const Summary = () => {
           mainPointDiscussed: result.mainPoints.join("\\n"),
           resolution: result.resolution,
         });
+         toast({
+            title: "Summary generated successfully!",
+          });
       } catch (error) {
         console.error("Error summarizing minutes:", error);
+         toast({
+            title: "Failed to generate summary.",
+            description: "Please try again.",
+            variant: "destructive",
+          });
       }
     }
   }
