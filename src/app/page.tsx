@@ -1,34 +1,19 @@
 "use client";
 
-import RealTimeEditor from "@/components/RealTimeEditor";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MeetingDetails from "@/components/MeetingDetails";
-import Summary from "@/components/Summary";
-import { useMeetingStore } from "@/store/meetingStore";
+import Link from "next/link";
 
 export default function Home() {
-  const { notes, meetingDetails, setNotes, setMeetingDetails } = useMeetingStore();
-
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-4">Vikimind</h1>
-
-      <Tabs defaultValue="details" className="w-[80%] mx-auto">
-        <TabsList>
-          <TabsTrigger value="details">Meeting Details</TabsTrigger>
-          <TabsTrigger value="realtime">Real-Time Editor</TabsTrigger>
-          <TabsTrigger value="summary">Summary</TabsTrigger>
-        </TabsList>
-        <TabsContent value="details">
-          <MeetingDetails setMeetingDetails={setMeetingDetails} />
-        </TabsContent>
-        <TabsContent value="realtime">
-          <RealTimeEditor />
-        </TabsContent>
-        <TabsContent value="summary">
-          <Summary />
-        </TabsContent>
-      </Tabs>
+    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      <h1 className="text-4xl font-bold mb-4">
+        Welcome to <span className="text-teal-500">Vikimind</span>
+      </h1>
+      <p className="text-lg mb-8">
+        Your AI-powered meeting minutes assistant. Effortlessly capture, summarize, and organize your meeting notes.
+      </p>
+      <Link href="/minutes" className="px-6 py-3 bg-teal-500 text-white font-bold rounded-md hover:bg-teal-700 transition-colors">
+        Start Taking Notes
+      </Link>
     </div>
   );
 }
