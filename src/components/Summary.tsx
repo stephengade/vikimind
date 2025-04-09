@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -16,6 +17,7 @@ import * as z from "zod";
 import { summarizeMinutes, SummarizeMinutesOutput } from "@/ai/flows/summarize-minutes-flow";
 import { useMeetingStore } from "@/store/meetingStore";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   mainPointDiscussed: z.string().min(10, {
@@ -27,9 +29,9 @@ const formSchema = z.object({
 });
 
 const Summary = () => {
-  const { notes, meetingDetails, summaryDetails, setSummaryDetails } = useMeetingStore();
+  const { notes, summaryDetails, setSummaryDetails } = useMeetingStore();
   const { toast } = useToast();
-  const form = useForm<z.infer<typeof formSchema>>({
+   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       mainPointDiscussed: summaryDetails.mainPointDiscussed,
@@ -37,7 +39,32 @@ const Summary = () => {
     },
   });
 
+  useEffect(() => {
+    // Load summary details from local storage on component mount
+    const storedSummaryDetails = localStorage.getItem("summaryDetails");
+    if (storedSummaryDetails) {
+      const parsedDetails = JSON.parse(storedSummaryDetails);
+      form.reset({
+        mainPointDiscussed: parsedDetails.mainPointDiscussed || "",
+        resolution: parsedDetails.resolution || "",
+      });
+      setSummaryDetails({
+        mainPointDiscussed: parsedDetails.mainPointDiscussed || "",
+        resolution: parsedDetails.resolution || "",
+      });
+    }
+  }, [form, setSummaryDetails]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Save summary details to local storage
+    localStorage.setItem(
+      "summaryDetails",
+      JSON.stringify({
+        mainPointDiscussed: values.mainPointDiscussed,
+        resolution: values.resolution,
+      })
+    );
+
     setSummaryDetails({
       mainPointDiscussed: values.mainPointDiscussed,
       resolution: values.resolution,
@@ -48,20 +75,28 @@ const Summary = () => {
         const result: SummarizeMinutesOutput = await summarizeMinutes({ minutes: notes });
         form.setValue("mainPointDiscussed", result.mainPoints.join("\\n"));
         form.setValue("resolution", result.resolution);
+        // Save updated summary details to local storage
+        localStorage.setItem(
+          "summaryDetails",
+          JSON.stringify({
+            mainPointDiscussed: result.mainPoints.join("\\n"),
+            resolution: result.resolution,
+          })
+        );
         setSummaryDetails({
           mainPointDiscussed: result.mainPoints.join("\\n"),
           resolution: result.resolution,
         });
-         toast({
-            title: "Summary generated successfully!",
-          });
+        toast({
+          title: "Summary generated successfully!",
+        });
       } catch (error) {
         console.error("Error summarizing minutes:", error);
-         toast({
-            title: "Failed to generate summary.",
-            description: "Please try again.",
-            variant: "destructive",
-          });
+        toast({
+          title: "Failed to generate summary.",
+          description: "Please try again.",
+          variant: "destructive",
+        });
       }
     }
   }

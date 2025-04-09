@@ -18,6 +18,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { useMeetingStore } from "@/store/meetingStore";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
 const formSchema = z.object({
   meetingDay: z.date({
@@ -25,6 +28,9 @@ const formSchema = z.object({
   }),
   startingTime: z.string().regex(new RegExp("^([0-9]{2}):([0-9]{2})$"), {
     message: "Starting Time must be in HH:MM format",
+  }),
+  endingTime: z.string().regex(new RegExp("^([0-9]{2}):([0-9]{2})$"), {
+    message: "Ending Time must be in HH:MM format",
   }),
   venue: z.string().min(2, {
     message: "Venue must be at least 2 characters.",
@@ -42,27 +48,63 @@ interface MeetingDetailsProps {
 }
 
 const MeetingDetails: React.FC<MeetingDetailsProps> = ({ setMeetingDetails }) => {
+  const { meetingDetails, setMeetingDetails: setMeetingDetailsStore } = useMeetingStore();
+  const [localMeetingDetails, setLocalMeetingDetails] = useState(meetingDetails);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      meetingDay: new Date(),
-      startingTime: "10:00",
-      venue: "",
-      attendance: "",
-      hostAnchor: "",
+      meetingDay: localMeetingDetails.meetingDay ? new Date(localMeetingDetails.meetingDay) : new Date(),
+      startingTime: localMeetingDetails.startingTime || "10:00",
+      endingTime: localMeetingDetails.endingTime || "11:00",
+      venue: localMeetingDetails.venue || "",
+      attendance: localMeetingDetails.attendance ? localMeetingDetails.attendance.join(", ") : "",
+      hostAnchor: localMeetingDetails.hostAnchor || "",
     },
   });
+
+  useEffect(() => {
+    // Load meeting details from local storage on component mount
+    const storedMeetingDetails = localStorage.getItem("meetingDetails");
+    if (storedMeetingDetails) {
+      const parsedDetails = JSON.parse(storedMeetingDetails);
+      setLocalMeetingDetails({
+        meetingDay: parsedDetails.meetingDay,
+        startingTime: parsedDetails.startingTime,
+        endingTime: parsedDetails.endingTime,
+        venue: parsedDetails.venue,
+        attendance: parsedDetails.attendance,
+        hostAnchor: parsedDetails.hostAnchor,
+      });
+      form.reset({
+        meetingDay: parsedDetails.meetingDay ? new Date(parsedDetails.meetingDay) : new Date(),
+        startingTime: parsedDetails.startingTime || "10:00",
+        endingTime: parsedDetails.endingTime || "11:00",
+        venue: parsedDetails.venue || "",
+        attendance: parsedDetails.attendance ? parsedDetails.attendance.join(", ") : "",
+        hostAnchor: parsedDetails.hostAnchor || "",
+      });
+    }
+  }, [form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const attendanceArray = values.attendance.split(",").map((item) => item.trim());
 
-    setMeetingDetails({
+    const meetingDetailsToSave = {
       meetingDay: values.meetingDay.toLocaleDateString(),
       startingTime: values.startingTime,
+      endingTime: values.endingTime,
       venue: values.venue,
       attendance: attendanceArray,
       hostAnchor: values.hostAnchor,
-    });
+    };
+
+    // Save meeting details to local storage
+    localStorage.setItem("meetingDetails", JSON.stringify(meetingDetailsToSave));
+
+    // Update Zustand store
+    setMeetingDetailsStore(meetingDetailsToSave);
+
+    setMeetingDetails(meetingDetailsToSave);
   }
 
   return (
@@ -124,6 +166,19 @@ const MeetingDetails: React.FC<MeetingDetailsProps> = ({ setMeetingDetails }) =>
         />
         <FormField
           control={form.control}
+          name="endingTime"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ending Time</FormLabel>
+              <FormControl>
+                <Input placeholder="HH:MM" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="venue"
           render={({ field }) => (
             <FormItem>
@@ -171,4 +226,3 @@ const MeetingDetails: React.FC<MeetingDetailsProps> = ({ setMeetingDetails }) =>
 };
 
 export default MeetingDetails;
-import { format } from "date-fns";
