@@ -42,6 +42,11 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+     /* Custom Analytics Colors */
+    --analytics-productive: 142 76% 36%; /* A shade of green for productive */
+    --analytics-stressful: 354 70% 50%; /* A shade of red for stressful */
+    --analytics-moderate: 47 88% 56%;  /* A shade of orange for moderate */
   }
   .dark {
     --background: 0 0% 15%;
@@ -76,6 +81,11 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom Analytics Colors (Dark Mode) */
+    --analytics-productive: 142 76% 36%;
+    --analytics-stressful: 354 70% 50%;
+    --analytics-moderate: 47 88% 56%;
   }
 }
 
